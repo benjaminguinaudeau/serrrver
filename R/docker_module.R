@@ -99,7 +99,6 @@ srv_get_port = function(self, container_name, filter_port = NULL){
           purrr::set_names("origin", "target") %>%
           dplyr::bind_rows(.)
       }) %>%
-      dplyr::distinct("target") %>%
       purrr::reduce(dplyr::bind_rows)
 
     if(is.null(filter_port)){
@@ -111,12 +110,13 @@ srv_get_port = function(self, container_name, filter_port = NULL){
       return(
         ports %>%
           dplyr::filter(target == filter_port) %>%
-          dplyr::pull(origin)
+          dplyr::pull(origin) %>%
+          unique
       )
     }
 
     if(length(filter_port) > 1){
-      return(ports %>% dplyr::filter(target %in% filter_port))
+      return(ports %>% dplyr::filter(target %in% filter_port) %>% dplyr::distinct(target))
     }
   }
 }
