@@ -48,7 +48,7 @@ srv <- R6::R6Class(
     init_docker_mod = function(){
 
       self$create_container <- function(...) srv_create_container(self, ...)
-      self$active_vnc <- function() srv_active_vnc(self, ...)
+      self$active_vnc <- function(...) srv_active_vnc(self, ...)
       self$list_container <- function() srv_list_container(self)
       self$running_containers <- function() srv_running_containers(self)
       self$stopped_containers <- function() srv_stopped_containers(self)

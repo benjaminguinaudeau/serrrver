@@ -18,3 +18,10 @@ chrome_remote <- function (srv, name = "", ua = NULL, cache = NULL){
   return(browser)
 }
 
+#' @export
+install_chrome <- function(srv){
+  ssh::ssh_exec_wait(srv$root, command = c("apt-get -y install git docker-compose",
+                                               "git clone https://github.com/DeinChristian/rpi-docker-selenium.git",
+                                               "docker build rpi-docker-selenium/standalone-chrome-debug -t chrome"
+                                               ))
+}
