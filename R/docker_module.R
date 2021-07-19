@@ -99,6 +99,7 @@ srv_get_port = function(self, container_name, filter_port = NULL){
           purrr::set_names("origin", "target") %>%
           dplyr::bind_rows(.)
       }) %>%
+      dplyr::distinct("target") %>%
       purrr::reduce(dplyr::bind_rows)
 
     if(is.null(filter_port)){
