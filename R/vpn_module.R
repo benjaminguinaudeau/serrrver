@@ -20,19 +20,41 @@ init_nordvpn <- function(self, nord_user = "", nord_pwd ="", force = F){
 
 }
 
-
 #' @export
-vpn_connect <- function(self, files, tbl_index = 201, tbl = "novpn", exclude_port = NULL){
+vpn_connect <- function(self, files = NULL, cisco_server = NULL, user = NULL, password = NULL, type = "openvpn"){
 
-  index <- 1
-  ip <- current_ip <- self$vpn_ip()
-  while(index < 5 & ip == current_ip){
-    last_config_line <- rawToChar(ssh::ssh_exec_internal(self$root, glue::glue("cat /etc/openvpn/{files[index]} | tail -n 1"))$stdout)
-    if(!str_detect(last_config_line, "auth-user-pass")){
-      ssh::ssh_exec_wait(self$root, command = c(glue::glue('echo "auth-user-pass /etc/openvpn/auth.txt" >> /etc/openvpn/{files[index]}')))
+  if(type == "openvpn"){
+    index <- 1
+    ip <- current_ip <- self$vpn_ip()
+    while(index < 5 & ip == current_ip){
+      last_config_line <- rawToChar(ssh::ssh_exec_internal(self$root, glue::glue("cat /etc/openvpn/{files[index]} | tail -n 1"))$stdout)
+      if(!str_detect(last_config_line, "auth-user-pass")){
+        ssh::ssh_exec_wait(self$root, command = c(glue::glue('echo "auth-user-pass /etc/openvpn/auth.txt" >> /etc/openvpn/{files[index]}')))
+      }
+      Sys.sleep(.2)
+      start_openvpn(host = self$host, port = self$port,pwd =  self$pwd, file = files[index])
+      connect_index <- 1
+      while(connect_index < 10 & ip == current_ip){
+        Sys.sleep(2)
+        ip <- self$vpn_ip()
+        connect_index <- connect_index + 1
+      }
+
+      index <- index + 1
     }
-    Sys.sleep(.2)
-    start_vpn(host = self$host,port = self$port,pwd =  self$pwd, file = files[index])
+
+    if(index == 5){
+      return(F)
+    } else {
+      return(T)
+    }
+  }
+  if(type == "cisco"){
+    index <- 1
+    ip <- current_ip <- self$vpn_ip()
+
+    start_cisco(host = self$host,port = self$port,pwd =  self$pwd,
+                user = user, password = password, cisco_server = cisco_server)
     connect_index <- 1
     while(connect_index < 10 & ip == current_ip){
       Sys.sleep(2)
@@ -40,19 +62,18 @@ vpn_connect <- function(self, files, tbl_index = 201, tbl = "novpn", exclude_por
       connect_index <- connect_index + 1
     }
 
-    index <- index + 1
-  }
-
-  if(index == 5){
-    return(F)
-  } else {
-    return(T)
+    if(connect_index == 10){
+      return(F)
+    } else {
+      return(T)
+    }
   }
 }
 
 #' @export
 vpn_disconnect <- function(self){
   ssh::ssh_exec_wait(self$session, command = c(sudo("killall openvpn", pwd = self$pwd)))
+  ssh::ssh_exec_wait(self$session, command = c(sudo("killall openconnect", pwd = self$pwd)))
 }
 
 #' @export
