@@ -19,8 +19,8 @@ srv_create_container = function(self,
 }
 
 #' @export
-srv_active_vnc = function(self){
-  ssh::ssh_exec_wait(self$root, command = c("docker exec -dt chrome /bin/bash -c 'x11vnc ${X11VNC_OPTS} -forever -shared -rfbport 5900 -display ${DISPLAY}'"))
+srv_active_vnc = function(self, container_name = "chrome"){
+  ssh::ssh_exec_wait(self$root, command = paste0("docker exec -dt ", container_name, " /bin/bash -c 'x11vnc ${X11VNC_OPTS} -forever -shared -rfbport 5900 -display ${DISPLAY}'"))
 }
 
 #' @export
