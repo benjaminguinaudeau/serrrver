@@ -31,7 +31,7 @@ start_openvpn <- function(host, port, pwd, file, log_path = NULL){
 connect_cisco <- function(host, port, pwd, cisco_server, user, password){
   root <- ssh::ssh_connect(host = glue::glue("root@{host}:{port}"), passwd = pwd)
   ssh::ssh_exec_wait(root, command = c(
-    glue::glue('echo {password} | openconnect -u {user} {cisco_server} &')
+    glue::glue('echo {password} | openconnect -u {user} {cisco_server}')
   ))
 }
 

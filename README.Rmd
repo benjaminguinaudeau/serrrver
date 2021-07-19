@@ -71,7 +71,7 @@ server$vpn_ip()
 ## OpenConnect
 
 ```{r}
-sudo apt install network-manager-openconnect
+# sudo apt install network-manager-openconnect
 
 
 ```
